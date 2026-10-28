@@ -65,12 +65,24 @@ const createOrder = async (req, res) => {
                 });
             }
 
+            // Tu dong tao Shipment khi dat hang thanh cong
+            await tx.shipment.create({
+                data: {
+                    oid: newOrder.oid,
+                    status: 'PENDING'
+                }
+            });
+
+            // Lay thong tin Order, OrderDetail va Shipment
             return tx.order.findUnique({
                 where: { oid: newOrder.oid },
                 include: {
                     orderDetails: {
-                        include: { product: true }
-                    }
+                        include: {
+                            product: true
+                        }
+                    },
+                    shipments: true
                 }
             });
         });
@@ -107,7 +119,8 @@ const getAllOrders = async (req, res) => {
                     include: {
                         product: true
                     }
-                }
+                },
+                shipments: true
             },
             orderBy: {
                 oid: 'desc'
@@ -124,6 +137,7 @@ const getAllOrders = async (req, res) => {
         });
     }
 };
+
 
 const getOrderById = async (req, res) => {
     try {
@@ -146,7 +160,8 @@ const getOrderById = async (req, res) => {
                     include: {
                         product: true
                     }
-                }
+                },
+                shipments: true
             }
         });
 
@@ -167,4 +182,8 @@ const getOrderById = async (req, res) => {
     }
 };
 
-module.exports = { createOrder, getAllOrders, getOrderById };
+module.exports = {
+    createOrder,
+    getAllOrders,
+    getOrderById
+};
